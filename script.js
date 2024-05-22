@@ -1,7 +1,16 @@
+let map;
+let locations = [];
+let route = [];
+
 document.getElementById('fileInput').addEventListener('change', handleFileSelect, false);
 document.getElementById('findRouteBtn').addEventListener('click', findRoute, false);
 
-let locations = [];
+function initMap() {
+    map = new google.maps.Map(document.getElementById('map'), {
+        zoom: 4,
+        center: {lat: 39.8283, lng: -98.5795}  // Centered on the US
+    });
+}
 
 function handleFileSelect(event) {
     const file = event.target.files[0];
@@ -27,8 +36,8 @@ function findRoute() {
         return;
     }
 
-    let route = [locations[0]];
     let currentLocation = locations[0];
+    route = [currentLocation];
     locations.splice(0, 1);
 
     while (locations.length > 0) {
@@ -48,7 +57,8 @@ function findRoute() {
         locations.splice(nearestIndex, 1);
     }
 
-    displayRoute(route);
+    displayRoute();
+    plotRouteOnMap();
 }
 
 function distance(loc1, loc2) {
@@ -66,9 +76,29 @@ function distance(loc1, loc2) {
     return R * c;
 }
 
-function displayRoute(route) {
+function displayRoute() {
     const routeDiv = document.getElementById('route');
     routeDiv.innerHTML = '<h2>Route</h2><ol>' +
                          route.map(loc => `<li>${loc.name} (${loc.latitude}, ${loc.longitude})</li>`).join('') +
                          '</ol>';
+}
+
+function plotRouteOnMap() {
+    const bounds = new google.maps.LatLngBounds();
+    const routePath = route.map(loc => {
+        const latLng = new google.maps.LatLng(loc.latitude, loc.longitude);
+        bounds.extend(latLng);
+        return latLng;
+    });
+
+    const path = new google.maps.Polyline({
+        path: routePath,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+    });
+
+    path.setMap(map);
+    map.fitBounds(bounds);
 }
