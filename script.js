@@ -7,8 +7,8 @@ document.getElementById('findRouteBtn').addEventListener('click', findRoute, fal
 
 function initMap() {
     map = new google.maps.Map(document.getElementById('map'), {
-        zoom: 4,
-        center: {lat: 39.8283, lng: -98.5795}  // Centered on the US
+        zoom: 10,
+        center: { lat: 60.4518, lng: 22.2666 } // Centered on Turku, Finland
     });
 }
 
@@ -20,9 +20,9 @@ function handleFileSelect(event) {
         const text = e.target.result;
         const rows = d3.csvParse(text);
         locations = rows.map(row => ({
-            name: row["location name"],  // Adjusted to match the CSV column name
-            latitude: parseFloat(row.latitude),
-            longitude: parseFloat(row.longitude)
+            name: row["Name"],
+            latitude: parseFloat(row["Latitude"]),
+            longitude: parseFloat(row["Longitude"])
         }));
         console.log(locations);  // Debugging: Check parsed locations
     };
@@ -64,15 +64,15 @@ function findRoute() {
 
 function distance(loc1, loc2) {
     const R = 6371e3; // metres
-    const φ1 = loc1.latitude * Math.PI/180;
-    const φ2 = loc2.latitude * Math.PI/180;
-    const Δφ = (loc2.latitude - loc1.latitude) * Math.PI/180;
-    const Δλ = (loc2.longitude - loc1.longitude) * Math.PI/180;
+    const φ1 = loc1.latitude * Math.PI / 180;
+    const φ2 = loc2.latitude * Math.PI / 180;
+    const Δφ = (loc2.latitude - loc1.latitude) * Math.PI / 180;
+    const Δλ = (loc2.longitude - loc1.longitude) * Math.PI / 180;
 
-    const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
+    const a = Math.sin(Δφ / 2) * Math.sin(Δφ / 2) +
               Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+              Math.sin(Δλ / 2) * Math.sin(Δλ / 2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1 - a));
 
     return R * c;
 }
