@@ -19,11 +19,20 @@ function handleFileSelect(event) {
     reader.onload = function(e) {
         const text = e.target.result;
         const rows = d3.csvParse(text);
-        locations = rows.map(row => ({
-            name: row["Name"],
-            latitude: parseFloat(row["Latitude"]),
-            longitude: parseFloat(row["Longitude"])
-        }));
+        locations = rows.map(row => {
+            const name = row["Name"];
+            const latitude = parseFloat(row["Latitude"]);
+            const longitude = parseFloat(row["Longitude"]);
+
+            console.log(`Parsing: ${name} (${latitude}, ${longitude})`); // Debugging line
+
+            return {
+                name: name,
+                latitude: latitude,
+                longitude: longitude
+            };
+        });
+
         console.log(locations);  // Debugging: Check parsed locations
     };
 
