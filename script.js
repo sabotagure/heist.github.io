@@ -71,4 +71,35 @@ function distance(loc1, loc2) {
 
     const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
               Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/
+              Math.sin(Δλ/2) * Math.sin(Δλ/2);
+    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
+
+    return R * c;
+}
+
+function displayRoute() {
+    const routeDiv = document.getElementById('route');
+    routeDiv.innerHTML = '<h2>Route</h2><ol>' +
+                         route.map(loc => `<li>${loc.name} (${loc.latitude}, ${loc.longitude})</li>`).join('') +
+                         '</ol>';
+}
+
+function plotRouteOnMap() {
+    const bounds = new google.maps.LatLngBounds();
+    const routePath = route.map(loc => {
+        const latLng = new google.maps.LatLng(loc.latitude, loc.longitude);
+        bounds.extend(latLng);
+        return latLng;
+    });
+
+    const path = new google.maps.Polyline({
+        path: routePath,
+        geodesic: true,
+        strokeColor: '#FF0000',
+        strokeOpacity: 1.0,
+        strokeWeight: 2
+    });
+
+    path.setMap(map);
+    map.fitBounds(bounds);
+}
