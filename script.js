@@ -20,11 +20,11 @@ function handleFileSelect(event) {
         const text = e.target.result;
         const rows = d3.csvParse(text);
         locations = rows.map(row => ({
-            name: row.name,
+            name: row["location name"],  // Adjusted to match the CSV column name
             latitude: parseFloat(row.latitude),
             longitude: parseFloat(row.longitude)
         }));
-        console.log(locations);
+        console.log(locations);  // Debugging: Check parsed locations
     };
 
     reader.readAsText(file);
@@ -36,25 +36,26 @@ function findRoute() {
         return;
     }
 
-    let currentLocation = locations[0];
+    let remainingLocations = [...locations];
+    let currentLocation = remainingLocations[0];
     route = [currentLocation];
-    locations.splice(0, 1);
+    remainingLocations.splice(0, 1);
 
-    while (locations.length > 0) {
+    while (remainingLocations.length > 0) {
         let nearestIndex = 0;
-        let nearestDistance = distance(currentLocation, locations[0]);
+        let nearestDistance = distance(currentLocation, remainingLocations[0]);
 
-        for (let i = 1; i < locations.length; i++) {
-            const d = distance(currentLocation, locations[i]);
+        for (let i = 1; i < remainingLocations.length; i++) {
+            const d = distance(currentLocation, remainingLocations[i]);
             if (d < nearestDistance) {
                 nearestDistance = d;
                 nearestIndex = i;
             }
         }
 
-        currentLocation = locations[nearestIndex];
+        currentLocation = remainingLocations[nearestIndex];
         route.push(currentLocation);
-        locations.splice(nearestIndex, 1);
+        remainingLocations.splice(nearestIndex, 1);
     }
 
     displayRoute();
@@ -70,35 +71,4 @@ function distance(loc1, loc2) {
 
     const a = Math.sin(Δφ/2) * Math.sin(Δφ/2) +
               Math.cos(φ1) * Math.cos(φ2) *
-              Math.sin(Δλ/2) * Math.sin(Δλ/2);
-    const c = 2 * Math.atan2(Math.sqrt(a), Math.sqrt(1-a));
-
-    return R * c;
-}
-
-function displayRoute() {
-    const routeDiv = document.getElementById('route');
-    routeDiv.innerHTML = '<h2>Route</h2><ol>' +
-                         route.map(loc => `<li>${loc.name} (${loc.latitude}, ${loc.longitude})</li>`).join('') +
-                         '</ol>';
-}
-
-function plotRouteOnMap() {
-    const bounds = new google.maps.LatLngBounds();
-    const routePath = route.map(loc => {
-        const latLng = new google.maps.LatLng(loc.latitude, loc.longitude);
-        bounds.extend(latLng);
-        return latLng;
-    });
-
-    const path = new google.maps.Polyline({
-        path: routePath,
-        geodesic: true,
-        strokeColor: '#FF0000',
-        strokeOpacity: 1.0,
-        strokeWeight: 2
-    });
-
-    path.setMap(map);
-    map.fitBounds(bounds);
-}
+              Math.sin(Δλ/2) * Math.sin(Δλ/
