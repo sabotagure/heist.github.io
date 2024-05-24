@@ -139,3 +139,12 @@ document.getElementById('nextButton').addEventListener('click', () => {
         highlightAddress(currentAddressIndex);
     }
 });
+document.getElementById('searchButton').addEventListener('click', () => {
+    const searchValue = parseInt(document.getElementById('searchBar').value, 10);
+    if (!isNaN(searchValue) && searchValue > 0 && searchValue <= routeMarkers.length) {
+        highlightAddress(searchValue - 1);
+        currentAddressIndex = searchValue - 1;
+    } else {
+        alert('Invalid address number');
+    }
+});
