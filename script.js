@@ -125,3 +125,17 @@ fetchCSV()
         numberAddresses(route);
     })
     .catch(error => console.error(error));
+let currentAddressIndex = 0;
+let routeMarkers = [];
+
+function highlightAddress(index) {
+    map.setView([routeMarkers[index].getLatLng().lat, routeMarkers[index].getLatLng().lng], 13);
+    routeMarkers[index].openPopup();
+}
+
+document.getElementById('nextButton').addEventListener('click', () => {
+    if (routeMarkers.length > 0) {
+        currentAddressIndex = (currentAddressIndex + 1) % routeMarkers.length;
+        highlightAddress(currentAddressIndex);
+    }
+});
