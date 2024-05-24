@@ -6,23 +6,38 @@
     <title>Map Display</title>
     <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
     <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+        }
         #map {
             height: 600px;
-            width: 100%;
+            width: 80%;
+            margin-top: 20px;
+        }
+        #nextButton, #searchButton {
+            margin: 10px;
+            padding: 10px 20px;
+            font-size: 16px;
+        }
+        #searchBar {
+            padding: 10px;
+            font-size: 16px;
+            margin: 10px;
         }
     </style>
 </head>
 <body>
+    <button id="nextButton">Next</button>
+    <input type="text" id="searchBar" placeholder="Enter address number">
+    <button id="searchButton">Search</button>
     <div id="map"></div>
     <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
     <script src="path/to/your/script.js"></script>
 </body>
 </html>
-
-<button id="nextButton">Next</button>
-<div id="map"></div>
-<script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
-<script src="path/to/your/script.js"></script>
-
-<input type="text" id="searchBar" placeholder="Enter address number">
-<button id="searchButton">Search</button>
