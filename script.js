@@ -13,11 +13,19 @@ function initMap() {
     directionsRenderer = new google.maps.DirectionsRenderer();
     directionsRenderer.setMap(map);
 
-    fetch('locations.csv')
-        .then(response => response.text())
+    fetch('addresses.csv')
+        .then(response => {
+            if (!response.ok) {
+                throw new Error('Network response was not ok');
+            }
+            return response.text();
+        })
         .then(data => {
             parseCSV(data);
             calculateAndDisplayRoute();
+        })
+        .catch(error => {
+            console.error('Error fetching CSV data:', error);
         });
 }
 
@@ -73,4 +81,4 @@ function showRoute() {
     }
 }
 
-window.onload = initMap;
+window.initMap = initMap;
