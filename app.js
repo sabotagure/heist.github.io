@@ -81,4 +81,5 @@ function showRoute() {
     }
 }
 
+// Ensure initMap is in the global scope
 window.initMap = initMap;
