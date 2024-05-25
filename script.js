@@ -1,111 +1,76 @@
-// Function to fetch the CSV file
-async function fetchCSV() {
-    const response = await fetch('addresses.csv');
-    const data = await response.text();
-    return data;
+let map;
+let directionsService;
+let directionsRenderer;
+let waypoints = [];
+let currentPointIndex = 0;
+
+function initMap() {
+    map = new google.maps.Map(document.getElementById("map"), {
+        center: { lat: 60.4269585, lng: 22.268828 },
+        zoom: 8,
+    });
+    directionsService = new google.maps.DirectionsService();
+    directionsRenderer = new google.maps.DirectionsRenderer();
+    directionsRenderer.setMap(map);
+
+    fetch('locations.csv')
+        .then(response => response.text())
+        .then(data => {
+            parseCSV(data);
+            calculateAndDisplayRoute();
+        });
 }
 
-// Function to parse CSV data
 function parseCSV(data) {
     const lines = data.split('\n');
-    const headers = lines[0].split(',');
-
-    const result = lines.slice(1).map(line => {
-        const values = line.split(',');
-        const obj = {};
-        headers.forEach((header, index) => {
-            obj[header] = values[index];
-        });
-        return obj;
-    });
-
-    return result;
-}
-
-// Initialize the map
-const map = L.map('map').setView([37.7749, -122.4194], 5); // Centered in the US
-
-// Add a tile layer to the map (OpenStreetMap tiles)
-L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
-    attribution: '&copy; OpenStreetMap contributors'
-}).addTo(map);
-
-let routeMarkers = [];
-let addresses = [];
-let currentAddressIndex = 0;
-
-// Function to plot markers on the map
-function plotMarkers(addresses) {
-    addresses.forEach((address, index) => {
-        const marker = L.marker([address.latitude, address.longitude]).addTo(map);
-        marker.bindPopup(`<b>${address.name}</b><br>Latitude: ${address.latitude}<br>Longitude: ${address.longitude}`);
-        routeMarkers.push(marker);
-    });
-}
-
-// Function to get the optimal route using Google Maps API
-async function getOptimalRoute(addresses) {
-    const waypoints = addresses.slice(1, -1).map(address => ({
-        location: `${address.latitude},${address.longitude}`,
-        stopover: true
-    }));
-
-    const origin = `${addresses[0].latitude},${addresses[0].longitude}`;
-    const destination = `${addresses[addresses.length - 1].latitude},${addresses[addresses.length - 1].longitude}`;
-
-    const response = await fetch(`https://maps.googleapis.com/maps/api/directions/json?origin=${origin}&destination=${destination}&waypoints=${waypoints.map(wp => wp.location).join('|')}&key=YOUR_GOOGLE_MAPS_API_KEY`);
-    const data = await response.json();
-    return data.routes[0];
-}
-
-// Function to display the route on the map
-function displayRoute(route) {
-    const coordinates = [];
-    route.legs.forEach(leg => {
-        leg.steps.forEach(step => {
-            step.lat_lngs.forEach(latlng => {
-                coordinates.push([latlng.lat(), latlng.lng()]);
+    lines.forEach(line => {
+        const [name, lat, lng] = line.split(',');
+        if (name && lat && lng) {
+            waypoints.push({
+                location: new google.maps.LatLng(parseFloat(lat), parseFloat(lng)),
+                stopover: true
             });
-        });
+        }
     });
-
-    const polyline = L.polyline(coordinates, { color: 'blue' }).addTo(map);
-    map.fitBounds(polyline.getBounds());
 }
 
-// Function to highlight an address
-function highlightAddress(index) {
-    map.setView([routeMarkers[index].getLatLng().lat, routeMarkers[index].getLatLng().lng], 13);
-    routeMarkers[index].openPopup();
+function calculateAndDisplayRoute() {
+    if (waypoints.length < 2) return;
+
+    directionsService.route({
+        origin: waypoints[0].location,
+        destination: waypoints[waypoints.length - 1].location,
+        waypoints: waypoints.slice(1, -1),
+        travelMode: google.maps.TravelMode.DRIVING,
+    }, (response, status) => {
+        if (status === 'OK') {
+            directionsRenderer.setDirections(response);
+        } else {
+            console.error('Directions request failed due to ' + status);
+        }
+    });
 }
 
-// Fetch and process the CSV data
-fetchCSV()
-    .then(data => {
-        addresses = parseCSV(data);
-        return getOptimalRoute(addresses);
-    })
-    .then(route => {
-        plotMarkers(addresses);
-        displayRoute(route);
-        numberAddresses(route);
-    })
-    .catch(error => console.error(error));
+function nextPoint() {
+    currentPointIndex = (currentPointIndex + 1) % waypoints.length;
+    map.panTo(waypoints[currentPointIndex].location);
+}
 
-// Event listeners for buttons
-document.getElementById('nextButton').addEventListener('click', () => {
-    if (routeMarkers.length > 0) {
-        currentAddressIndex = (currentAddressIndex + 1) % routeMarkers.length;
-        highlightAddress(currentAddressIndex);
+function showRoute() {
+    const pointIndex = parseInt(document.getElementById('search').value);
+    if (!isNaN(pointIndex) && pointIndex >= 0 && pointIndex < waypoints.length - 1) {
+        directionsService.route({
+            origin: waypoints[pointIndex].location,
+            destination: waypoints[pointIndex + 1].location,
+            travelMode: google.maps.TravelMode.DRIVING,
+        }, (response, status) => {
+            if (status === 'OK') {
+                directionsRenderer.setDirections(response);
+            } else {
+                console.error('Directions request failed due to ' + status);
+            }
+        });
     }
-});
+}
 
-document.getElementById('searchButton').addEventListener('click', () => {
-    const searchValue = parseInt(document.getElementById('searchBar').value, 10);
-    if (!isNaN(searchValue) && searchValue > 0 && searchValue <= routeMarkers.length) {
-        highlightAddress(searchValue - 1);
-        currentAddressIndex = searchValue - 1;
-    } else {
-        alert('Invalid address number');
-    }
-});
+window.onload = initMap;
