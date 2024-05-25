@@ -4,26 +4,16 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Smart Route Planner</title>
-    <link rel="stylesheet" href="style.css">
-    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.7.1/dist/leaflet.css" />
-    <script src="https://unpkg.com/leaflet@1.7.1/dist/leaflet.js"></script>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://maps.googleapis.com/maps/api/js?key=AIzaSyCoI2_LjV0YTOr1DAltRyIQqu7tdLAvu5U&libraries=places"></script>
 </head>
 <body>
-    <header>
-        <h1>Smart Route Planner</h1>
-    </header>
-    <main>
-        <div class="controls">
-            <button id="nextButton">Next</button>
-            <input type="text" id="searchBar" placeholder="Enter address number">
-            <button id="searchButton">Search</button>
-        </div>
-        <div id="map"></div>
-    </main>
-    <footer>
-        <p>Powered by Leaflet.js and Google Maps API</p>
-    </footer>
-    <script src="script.js"></script>
+    <div id="map"></div>
+    <div id="controls">
+        <input type="text" id="search" placeholder="Enter point number...">
+        <button onclick="showRoute()">Show Route</button>
+        <button onclick="nextPoint()">Next</button>
+    </div>
+    <script src="app.js"></script>
 </body>
 </html>
